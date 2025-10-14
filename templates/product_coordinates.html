@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptimalPath - Product Coordinates</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/product_coordinates.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00d4ff',
+                        'neon-purple': '#9d4edd',
+                        'neon-green': '#39ff14',
+                        'neon-orange': '#ff6b35',
+                        'cyber-dark': '#0a0a0a',
+                        'cyber-gray': '#1a1a1a',
+                        'cyber-lighter': '#2a2a2a'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full w-full bg-gradient-to-br from-cyber-dark via-gray-900 to-cyber-gray text-white overflow-hidden flex flex-col">
+    <!-- Navigation Header -->
+    <nav class="bg-cyber-gray border-b border-neon-blue/30 backdrop-blur-lg flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-route text-neon-blue text-2xl"></i>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
+                            OptimalPath
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="px-4 py-2 rounded-lg hover:bg-neon-blue/20 text-gray-300 hover:text-neon-blue transition-all duration-300">
+                        <i class="fas fa-grid-3x3 mr-2"></i>Grid Editor
+                    </a>
+                    <a href="/pathfinding/" class="px-4 py-2 rounded-lg hover:bg-neon-purple/20 text-gray-300 hover:text-neon-purple transition-all duration-300">
+                        <i class="fas fa-map-marked-alt mr-2"></i>Pathfinding
+                    </a>
+                    <a href="/product_coordinates/" class="px-4 py-2 rounded-lg bg-neon-green/20 text-neon-green border border-neon-green/30 hover:bg-neon-green/30 transition-all duration-300">
+                        <i class="fas fa-boxes mr-2"></i>Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-hidden flex flex-col">
+        <div class="flex-1 p-4 overflow-y-auto">
+            <div class="max-w-7xl mx-auto h-full">
+                <div class="bg-cyber-gray/50 backdrop-blur-lg rounded-2xl border border-neon-green/30 shadow-2xl p-6 h-full flex flex-col">
+                    <div class="flex items-center space-x-3 mb-6 flex-shrink-0">
+                        <i class="fas fa-boxes text-neon-green text-3xl"></i>
+                        <h1 class="text-2xl font-bold bg-gradient-to-r from-neon-green to-white bg-clip-text text-transparent">
+                            Product Coordinate Manager
+                        </h1>
+                    </div>
+
+                    <div class="flex-1 flex flex-col space-y-4 overflow-hidden">
+                        <!-- Upload Section -->
+                        <div class="bg-cyber-lighter/50 rounded-xl p-4 border border-neon-blue/30 flex-shrink-0">
+                            <h3 class="text-md font-semibold text-neon-blue mb-3 flex items-center">
+                                <i class="fas fa-upload mr-2"></i>Upload Floor Plan
+                            </h3>
+                            <form id="uploadForm" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-3">
+                                <div class="flex-1">
+                                    <input
+                                        type="file"
+                                        id="floorPlan"
+                                        name="floorPlan"
+                                        accept="image/*"
+                                        required
+                                        class="w-full bg-cyber-dark border border-neon-blue/30 rounded-lg px-2 py-1 text-white text-sm focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300"
+                                    />
+                                </div>
+                                <button type="submit" class="cyber-btn cyber-btn-blue text-sm px-3 py-1">
+                                    <i class="fas fa-upload mr-2"></i>Upload
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Grid Areas -->
+                        <div class="flex-1 grid grid-cols-1 xl:grid-cols-3 gap-4 overflow-hidden">
+                            <!-- Current Floor Plan -->
+                            <div class="xl:col-span-2 flex flex-col overflow-hidden">
+                                <div class="bg-cyber-lighter/30 rounded-xl border border-neon-green/30 p-3 flex-1 flex flex-col overflow-hidden">
+                                    <h3 class="text-md font-semibold text-neon-green mb-3 flex items-center flex-shrink-0">
+                                        <i class="fas fa-warehouse mr-2"></i>Current Floor Plan
+                                    </h3>
+                                    <div id="gridContainer" class="border border-neon-green/50 rounded-lg bg-cyber-dark/50 flex-1 overflow-auto">
+                                        <div id="grid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Historical Floor Plans -->
+                            <div class="flex flex-col overflow-hidden">
+                                <div class="bg-cyber-lighter/30 rounded-xl border border-neon-purple/30 p-3 flex-1 flex flex-col overflow-hidden">
+                                    <h3 class="text-md font-semibold text-neon-purple mb-3 flex items-center flex-shrink-0">
+                                        <i class="fas fa-history mr-2"></i>Previous Floor Plans
+                                    </h3>
+                                    <div id="historicalGrids" class="space-y-2 overflow-y-auto flex-1"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Secondary Grid View -->
+                        <div class="bg-cyber-lighter/30 rounded-xl border border-neon-orange/30 p-3 flex-shrink-0" style="height: 200px;">
+                            <h3 class="text-md font-semibold text-neon-orange mb-3 flex items-center">
+                                <i class="fas fa-th mr-2"></i>Secondary Grid View
+                            </h3>
+                            <div id="gridContainer1" class="border border-neon-orange/50 rounded-lg bg-cyber-dark/50 h-full overflow-auto">
+                                <div id="grid1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-cyber-gray/95 backdrop-blur-lg rounded-2xl border border-neon-green/30 max-w-md w-full shadow-2xl">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold bg-gradient-to-r from-neon-green to-neon-blue bg-clip-text text-transparent flex items-center">
+                        <i class="fas fa-box mr-3 text-neon-green"></i>Add Product
+                    </h3>
+                    <span class="close text-gray-400 hover:text-neon-green text-3xl cursor-pointer transition-colors duration-300 hover:rotate-90 transform">
+                        <i class="fas fa-times"></i>
+                    </span>
+                </div>
+                
+                <form id="productForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="productName" class="block text-sm font-medium text-gray-300 mb-2">Product Name:</label>
+                            <input type="text" id="productName" name="productName" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                        <div>
+                            <label for="productId" class="block text-sm font-medium text-gray-300 mb-2">Product ID:</label>
+                            <input type="text" id="productId" name="productId" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-gray-300 mb-2">Weight (kg):</label>
+                            <input type="number" id="weight" name="weight" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                        <div>
+                            <label for="height" class="block text-sm font-medium text-gray-300 mb-2">Height (cm):</label>
+                            <input type="number" id="height" name="height" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="width" class="block text-sm font-medium text-gray-300 mb-2">Width (cm):</label>
+                            <input type="number" id="width" name="width" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                        <div>
+                            <label for="length" class="block text-sm font-medium text-gray-300 mb-2">Length (cm):</label>
+                            <input type="number" id="length" name="length" required 
+                                   class="w-full bg-cyber-dark border border-neon-green/30 rounded-lg px-3 py-2 text-white focus:border-neon-green focus:outline-none focus:ring-2 focus:ring-neon-green/20 transition-all duration-300" />
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="xCoord" name="xCoord" />
+                    <input type="hidden" id="yCoord" name="yCoord" />
+                    
+                    <button type="submit" class="w-full cyber-btn cyber-btn-green">
+                        <i class="fas fa-save mr-2"></i>Save Product
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/product_coordinates.js"></script>
+</body>
+</html>

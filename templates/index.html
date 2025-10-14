@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptimalPath - Floor Plan Grid Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ url_for('static', path='/css/optimized.css') }}" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00d4ff',
+                        'neon-purple': '#9d4edd',
+                        'neon-green': '#39ff14',
+                        'cyber-dark': '#0a0a0a',
+                        'cyber-gray': '#1a1a1a',
+                        'cyber-lighter': '#2a2a2a'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lightweight icons using Unicode symbols instead of Font Awesome -->
+    <style>
+        .icon-grid::before { content: '▦'; }
+        .icon-route::before { content: '🗺️'; }
+        .icon-pathfind::before { content: '📍'; }
+        .icon-boxes::before { content: '📦'; }
+        .icon-upload::before { content: '📤'; }
+        .icon-save::before { content: '💾'; }
+        .icon-close::before { content: '✕'; }
+    </style>
+</head>
+<body class="h-full w-full bg-gradient-to-br from-cyber-dark via-gray-900 to-cyber-gray text-white overflow-hidden flex flex-col">
+    <!-- Navigation Header -->
+    <nav class="bg-cyber-gray border-b border-neon-blue/30 backdrop-blur-lg flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="icon-route text-neon-blue text-2xl"></span>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
+                            OptimalPath
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="px-4 py-2 rounded-lg bg-neon-blue/20 text-neon-blue border border-neon-blue/30 hover:bg-neon-blue/30 transition-colors duration-150">
+                        <span class="icon-grid mr-2"></span>Grid Editor
+                    </a>
+                    <a href="/pathfinding/" class="px-4 py-2 rounded-lg hover:bg-neon-purple/20 text-gray-300 hover:text-neon-purple transition-colors duration-150">
+                        <span class="icon-pathfind mr-2"></span>Pathfinding
+                    </a>
+                    <a href="/product_coordinates/" class="px-4 py-2 rounded-lg hover:bg-neon-green/20 text-gray-300 hover:text-neon-green transition-colors duration-150">
+                        <span class="icon-boxes mr-2"></span>Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-hidden flex flex-col">
+        <div class="flex-1 p-4 overflow-y-auto">
+            <div class="max-w-7xl mx-auto h-full">
+                
+                <!-- Grid Setup Screen -->
+                <div id="gridSetupScreen" class="bg-cyber-gray/50 backdrop-blur-lg rounded-2xl border border-neon-blue/30 shadow-2xl p-6 h-full flex flex-col justify-center items-center">
+                    <div class="text-center max-w-4xl">
+                        <div class="flex items-center justify-center space-x-3 mb-8">
+                            <span class="icon-grid text-neon-blue text-4xl"></span>
+                            <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-blue to-white bg-clip-text text-transparent">
+                                Floor Plan Grid Editor
+                            </h1>
+                        </div>
+                        
+                        <p class="text-gray-300 text-lg mb-8">
+                            Configure your warehouse floor plan dimensions and upload an optional background image
+                        </p>
+                        
+                        <!-- Grid Configuration Card -->
+                        <div class="bg-cyber-lighter/50 backdrop-blur-lg rounded-xl border border-neon-blue/30 p-8 shadow-xl">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <span class="icon-grid text-neon-blue text-2xl"></span>
+                                <h2 class="text-xl font-semibold text-neon-blue">Grid Configuration</h2>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <!-- Grid Dimensions -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-medium text-neon-purple mb-3">Grid Dimensions</h3>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="rows" class="block text-sm font-medium text-gray-300 mb-2">Rows</label>
+                                            <input type="number" id="rows" class="w-full bg-cyber-dark border-2 border-neon-blue/30 rounded-lg px-4 py-3 text-white text-lg focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300" min="1" max="100" value="10" placeholder="10">
+                                        </div>
+                                        <div>
+                                            <label for="cols" class="block text-sm font-medium text-gray-300 mb-2">Columns</label>
+                                            <input type="number" id="cols" class="w-full bg-cyber-dark border-2 border-neon-blue/30 rounded-lg px-4 py-3 text-white text-lg focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300" min="1" max="100" value="10" placeholder="10">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label for="actualWidth" class="block text-sm font-medium text-gray-300 mb-2">Width (meters)</label>
+                                            <input type="number" id="actualWidth" class="w-full bg-cyber-dark border-2 border-neon-blue/30 rounded-lg px-4 py-3 text-white text-lg focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300" min="0" step="0.1" value="100" placeholder="100.0">
+                                        </div>
+                                        <div>
+                                            <label for="actualLength" class="block text-sm font-medium text-gray-300 mb-2">Length (meters)</label>
+                                            <input type="number" id="actualLength" class="w-full bg-cyber-dark border-2 border-neon-blue/30 rounded-lg px-4 py-3 text-white text-lg focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300" min="0" step="0.1" value="100" placeholder="100.0">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Image Upload -->
+                                <div class="space-y-4">
+                                    <h3 class="text-lg font-medium text-neon-purple mb-3">Background Image (Optional)</h3>
+                                    
+                                    <div class="border-2 border-dashed border-neon-blue/30 rounded-lg p-6 text-center hover:border-neon-blue/50 transition-colors duration-300">
+                                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                                        <div id="uploadArea" class="cursor-pointer">
+                                            <span class="icon-upload text-neon-blue text-3xl block mb-2"></span>
+                                            <p class="text-gray-300 mb-2">Click to upload floor plan image</p>
+                                            <p class="text-sm text-gray-400">PNG, JPG up to 10MB</p>
+                                        </div>
+                                        <div id="imagePreview" class="hidden mt-4">
+                                            <img id="previewImg" class="max-w-full h-32 object-contain mx-auto rounded-lg">
+                                            <p id="imageName" class="text-sm text-neon-cyan mt-2"></p>
+                                            <div class="flex gap-2 justify-center mt-2">
+                                                <button id="autoGridBtn" class="bg-neon-cyan/20 hover:bg-neon-cyan/30 text-neon-cyan px-3 py-1 rounded text-sm transition-colors duration-200">
+                                                    <span class="icon-grid mr-1"></span>Auto Grid
+                                                </button>
+                                                <button id="removeImage" class="text-red-400 hover:text-red-300 text-sm">
+                                                    <span class="icon-close mr-1"></span>Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                <button id="initializeBtn" class="bg-gradient-to-r from-neon-blue to-neon-purple hover:from-neon-purple hover:to-neon-blue px-8 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                    <span class="icon-grid mr-2"></span>
+                                    Initialize Grid Editor
+                                </button>
+                            </div>
+                            
+                            <div class="mt-6 text-sm text-gray-400">
+                                <span class="icon-grid mr-2"></span>
+                                Configure your warehouse layout to start creating and editing floor plans
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fullscreen Grid Editor View -->
+                <div id="gridEditorView" class="hidden fixed inset-0 bg-cyber-dark z-50 flex flex-col">
+                    <!-- Fullscreen Header Controls -->
+                    <div class="bg-cyber-gray/80 backdrop-blur-lg border-b border-neon-blue/30 p-3 flex-shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h1 class="text-xl font-bold bg-gradient-to-r from-neon-blue to-white bg-clip-text text-transparent">
+                                    <span class="icon-grid mr-2"></span>Floor Plan Grid Editor
+                                </h1>
+                                <div class="text-sm text-gray-400" id="gridInfo">
+                                    <!-- Grid info will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Control Buttons -->
+                            <div class="flex items-center gap-2">
+                                <!-- Tool Selection -->
+                                <div class="flex gap-1 border-r border-neon-blue/30 pr-2">
+                                    <button id="obstacleBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-2 active" title="Add Obstacles">
+                                        <span class="icon-boxes mr-1"></span>Obstacle
+                                    </button>
+                                    <button id="clearCellBtn" class="cyber-btn cyber-btn-green text-sm px-3 py-2" title="Clear Cells">
+                                        <span class="icon-close mr-1"></span>Clear
+                                    </button>
+                                </div>
+                                
+                                <!-- Action Tools -->
+                                <div class="flex gap-1 border-r border-neon-blue/30 pr-2">
+                                    <button id="saveBtn" class="cyber-btn cyber-btn-purple text-sm px-3 py-2" title="Save Grid">
+                                        <span class="icon-save mr-1"></span>Save
+                                    </button>
+                                    <button id="clearAllBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-2" title="Clear All">
+                                        <span class="icon-close mr-1"></span>Clear All
+                                    </button>
+                                </div>
+                                
+                                <!-- Utility Tools -->
+                                <div class="flex gap-1">
+                                    <button id="exitEditorBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-2" title="Exit Editor">
+                                        <span class="icon-close"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Screen Grid Display -->
+                    <div class="flex-1 p-2 overflow-hidden">
+                        <div id="gridContainer" class="w-full h-full border border-neon-blue/50 rounded-lg relative overflow-auto bg-cyber-dark/50">
+                            <div id="grid" class="relative w-full h-full">
+                                <!-- Grid cells will be inserted here -->
+                            </div>
+                            <img id="floorPlanImage" class="absolute top-0 left-0 w-full h-full object-contain opacity-50 hidden">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', path='/js/main.js') }}"></script>
+</body>
+</html>

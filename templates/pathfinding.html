@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, minimum-scale=0.5, maximum-scale=3.0">
+    <title>OptimalPath - Warehouse Pathfinding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="{{ url_for('static', path='/css/pathfinding.css') }}" rel="stylesheet">
+    <!-- Lightweight icons -->
+    <style>
+        .icon-route::before { content: '🗺️'; }
+        .icon-grid::before { content: '▦'; }
+        .icon-pathfind::before { content: '📍'; }
+        .icon-boxes::before { content: '📦'; }
+        .icon-play::before { content: '▶️'; }
+        .icon-stop::before { content: '⏹️'; }
+        .icon-trash::before { content: '🗑️'; }
+        .icon-search::before { content: '🔍'; }
+        .icon-info::before { content: 'ℹ️'; }
+        .icon-zoom-in::before { content: '🔍+'; }
+        .icon-zoom-out::before { content: '🔍-'; }
+        .icon-close::before { content: '✕'; }
+        .icon-flag::before { content: '🚩'; }
+        .icon-plus::before { content: '➕'; }
+        .icon-eraser::before { content: '🧹'; }
+        .icon-palette::before { content: '🎨'; }
+        .icon-map::before { content: '🗺️'; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'neon-blue': '#00d4ff',
+                        'neon-purple': '#9d4edd',
+                        'neon-green': '#39ff14',
+                        'neon-orange': '#ff6b35',
+                        'cyber-dark': '#0a0a0a',
+                        'cyber-gray': '#1a1a1a',
+                        'cyber-lighter': '#2a2a2a'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full w-full bg-gradient-to-br from-cyber-dark via-gray-900 to-cyber-gray text-white overflow-hidden flex flex-col">
+    <!-- Navigation Header -->
+    <nav class="bg-cyber-gray border-b border-neon-blue/30 backdrop-blur-lg flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="icon-route text-neon-blue text-2xl"></span>
+                        <h1 class="text-xl font-bold bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">
+                            OptimalPath
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/" class="px-4 py-2 rounded-lg hover:bg-neon-blue/20 text-gray-300 hover:text-neon-blue transition-all duration-300">
+                        <span class="icon-grid mr-2"></span>Grid Editor
+                    </a>
+                    <a href="/pathfinding/" class="px-4 py-2 rounded-lg bg-neon-purple/20 text-neon-purple border border-neon-purple/30 hover:bg-neon-purple/30 transition-all duration-300">
+                        <span class="icon-pathfind mr-2"></span>Pathfinding
+                    </a>
+                    <a href="/product_coordinates/" class="px-4 py-2 rounded-lg hover:bg-neon-green/20 text-gray-300 hover:text-neon-green transition-all duration-300">
+                        <span class="icon-boxes mr-2"></span>Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-hidden flex flex-col">
+        <div class="flex-1 p-4 overflow-y-auto">
+            <div class="max-w-7xl mx-auto h-full">
+                
+                <!-- Map Selection Screen -->
+                <div id="mapSelectionScreen" class="bg-cyber-gray/50 backdrop-blur-lg rounded-2xl border border-neon-purple/30 shadow-2xl p-6 h-full flex flex-col justify-center items-center">
+                    <div class="text-center max-w-2xl">
+                        <div class="flex items-center justify-center space-x-3 mb-8">
+                            <span class="icon-route text-neon-blue text-4xl"></span>
+                            <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-purple to-white bg-clip-text text-transparent">
+                                Warehouse Pathfinding
+                            </h1>
+                        </div>
+                        
+                        <p class="text-gray-300 text-lg mb-8">
+                            Select a floor plan to start pathfinding and route optimization
+                        </p>
+                        
+                        <!-- Map Selection Card -->
+                        <div class="bg-cyber-lighter/50 backdrop-blur-lg rounded-xl border border-neon-blue/30 p-8 shadow-xl">
+                            <div class="flex items-center space-x-3 mb-6">
+                                <span class="icon-map text-neon-blue text-2xl"></span>
+                                <h2 class="text-xl font-semibold text-neon-blue">Choose Floor Plan</h2>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <select id="mapSelect" class="w-full bg-cyber-dark border-2 border-neon-blue/30 rounded-lg px-4 py-3 text-white text-lg focus:border-neon-blue focus:outline-none focus:ring-2 focus:ring-neon-blue/20 transition-all duration-300">
+                                    <option value="">Select a floor plan...</option>
+                                </select>
+                                
+                                <button id="loadMapBtn" class="w-full bg-gradient-to-r from-neon-purple to-neon-blue hover:from-neon-blue hover:to-neon-purple px-6 py-3 rounded-lg text-white font-semibold transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" disabled>
+                                    <span class="icon-play mr-2"></span>
+                                    Load Pathfinding View
+                                </button>
+                            </div>
+                            
+                            <div class="mt-6 text-sm text-gray-400">
+                                <span class="icon-info mr-2"></span>
+                                Select a warehouse layout to enable pathfinding tools and start route planning
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fullscreen Pathfinding View -->
+                <div id="pathfindingView" class="hidden fixed inset-0 bg-cyber-dark z-50 flex flex-col">
+                    <!-- Fullscreen Header Controls -->
+                    <div class="bg-cyber-gray/80 backdrop-blur-lg border-b border-neon-purple/30 p-3 flex-shrink-0">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <h1 class="text-xl font-bold bg-gradient-to-r from-neon-purple to-white bg-clip-text text-transparent">
+                                    <span class="icon-route mr-2"></span>Warehouse Pathfinding
+                                </h1>
+                                <div class="text-sm text-gray-400" id="mapInfo">
+                                    <!-- Map info will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Control Buttons -->
+                            <div class="flex items-center gap-2">
+                                <!-- Point Setting Tools -->
+                                <div class="flex gap-1 border-r border-neon-blue/30 pr-2">
+                                    <button id="startBtn" class="cyber-btn cyber-btn-blue text-sm px-3 py-2" title="Set Start Point">
+                                        <span class="icon-play mr-1"></span>Start
+                                    </button>
+                                    <button id="endBtn" class="cyber-btn cyber-btn-green text-sm px-3 py-2" title="Set End Point">
+                                        <span class="icon-flag mr-1"></span>End
+                                    </button>
+                                    <button id="pickupBtn" class="cyber-btn cyber-btn-orange text-sm px-3 py-2" title="Add Pickup Point">
+                                        <span class="icon-plus mr-1"></span>Pickup
+                                    </button>
+                                </div>
+                                
+                                <!-- Action Tools -->
+                                <div class="flex gap-1 border-r border-neon-blue/30 pr-2">
+                                    <button id="findPathBtn" class="cyber-btn cyber-btn-purple text-sm px-3 py-2" title="Find Optimal Path">
+                                        <span class="icon-search mr-1"></span>Find Path
+                                    </button>
+                                    <button id="clearBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-2" title="Clear All">
+                                        <span class="icon-eraser mr-1"></span>Clear
+                                    </button>
+                                </div>
+                                
+                                <!-- Zoom Controls -->
+                                <div class="flex gap-1 border-r border-neon-blue/30 pr-2">
+                                    <button id="zoomOutBtn" class="cyber-btn cyber-btn-blue text-sm px-3 py-2" title="Zoom Out">
+                                        <span class="icon-zoom-out"></span>
+                                    </button>
+                                    <button id="zoomInBtn" class="cyber-btn cyber-btn-blue text-sm px-3 py-2" title="Zoom In">
+                                        <span class="icon-zoom-in"></span>
+                                    </button>
+                                    <button id="fitToScreenBtn" class="cyber-btn cyber-btn-green text-sm px-3 py-2" title="Fit to Screen">
+                                        📏
+                                    </button>
+                                </div>
+                                
+                                <!-- Utility Tools -->
+                                <div class="flex gap-1">
+                                    <button id="detailsBtn" class="cyber-btn cyber-btn-cyan text-sm px-3 py-2" title="Show Details">
+                                        <span class="icon-info"></span>
+                                    </button>
+                                    <button id="fastRenderBtn" class="cyber-btn cyber-btn-yellow text-sm px-3 py-2" title="Toggle Fast Rendering">
+                                        <span class="icon-palette"></span>
+                                    </button>
+                                    <button id="exitFullscreenBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-2" title="Exit Fullscreen">
+                                        <span class="icon-close"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full Screen Grid Display -->
+                    <div class="flex-1 p-2 overflow-hidden">
+                        <div id="gridContainer" class="w-full h-full border border-neon-green/50 rounded-lg relative overflow-auto bg-cyber-dark/50">
+                            <div id="grid" class="relative w-full h-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    <!-- Details Modal -->
+                    <div id="detailsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden">
+                        <div class="flex items-center justify-center min-h-screen p-4">
+                            <div class="bg-cyber-dark border-2 border-neon-cyan rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-neon-cyan">
+                                        <span class="icon-info mr-2"></span>Pathfinding Details
+                                    </h3>
+                                    <button id="closeDetailsBtn" class="cyber-btn cyber-btn-red text-sm px-3 py-1">
+                                        <span class="icon-close"></span>
+                                    </button>
+                                </div>
+                                
+                                <!-- Legend -->
+                                <div class="mb-6">
+                                    <h4 class="text-md font-semibold text-neon-orange mb-3">
+                                        <span class="icon-palette mr-2"></span>Legend
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div class="flex items-center space-x-3 p-3 bg-cyber-lighter/50 rounded-lg border border-neon-blue/30">
+                                            <div class="w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-600 rounded border-2 border-neon-blue glow-blue"></div>
+                                            <span class="text-gray-200 font-medium">Start Point</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3 p-3 bg-cyber-lighter/50 rounded-lg border border-neon-green/30">
+                                            <div class="w-6 h-6 bg-gradient-to-r from-green-400 to-green-600 rounded border-2 border-neon-green glow-green"></div>
+                                            <span class="text-gray-200 font-medium">End Point</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3 p-3 bg-cyber-lighter/50 rounded-lg border border-yellow-400/30">
+                                            <div class="w-6 h-6 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded border-2 border-yellow-400 glow-yellow"></div>
+                                            <span class="text-gray-200 font-medium">Pickup Point</span>
+                                        </div>
+                                        <div class="flex items-center space-x-3 p-3 bg-cyber-lighter/50 rounded-lg border border-neon-purple/30">
+                                            <div class="w-6 h-6 bg-gradient-to-r from-purple-400 to-purple-600 rounded border-2 border-neon-purple glow-purple"></div>
+                                            <span class="text-gray-200 font-medium">Optimal Path</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Grid Information -->
+                                <div id="gridInfo" class="mb-6">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+
+                                <!-- Coordinates Information -->
+                                <div id="coordinatesInfo" class="mb-6">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+
+                                <!-- Path Information -->
+                                <div id="pathInfo">
+                                    <!-- Will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', path='/js/pathfinding.js') }}"></script>
+</body>
+</html>
