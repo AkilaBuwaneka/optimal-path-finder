@@ -1,24 +1,22 @@
 # Find Optimal Path 🗺️🤖
 
-AI-powered indoor navigation and pathfinding solution for complex environments.
+Indoor navigation and pathfinding solution for complex environments.
 
 ## Overview
 
-Find Optimal Path is an intelligent application that analyzes floor plans, identifies obstacles, and calculates the most efficient routes between multiple points. Perfect for warehouse optimization, indoor navigation, and logistics planning.
+Find Optimal Path is an application that analyzes floor plans, identifies obstacles, and calculates the most efficient routes between multiple points. Perfect for warehouse optimization, indoor navigation, and logistics planning.
 
 ## Key Features
 
 - 📸 **Floor Plan Upload** - Import and analyze floor plan images
 - 🚧 **Obstacle Marking** - Define restricted areas and barriers
 - 🎯 **Multi-Point Routing** - Calculate optimal paths through multiple destinations
-- 🤖 **AI-Powered Analysis** - Computer vision for automatic floor plan processing
 - 📊 **Route Optimization** - Advanced algorithms for efficient pathfinding
 
 ## Tech Stack
 
 **Backend:** FastAPI, Python  
-**Database:** MongoDB  
-**AI/ML:** Computer Vision, Pathfinding Algorithms
+**Database:** MongoDB 
 
 ## The Problem
 
@@ -31,7 +29,7 @@ Manual path planning in complex indoor spaces is:
 ## The Solution
 
 Find Optimal Path automates:
-- Floor plan analysis using computer vision
+- Floor plan analysis
 - Intelligent obstacle detection and avoidance
 - Multi-point route optimization
 - Visual path editing and refinement
