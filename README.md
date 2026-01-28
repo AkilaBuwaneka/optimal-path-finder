@@ -1,4 +1,4 @@
-# Find Optimal Path 🗺️🤖
+# Find Optimal Path 🗺️
 
 Indoor navigation and pathfinding solution for complex environments.
 
